@@ -1,0 +1,5 @@
+Django==6.1
+djangorestframework==3.18.0
+django-cors-headers==4.9.0
+resend==2.36.0
+python-dotenv==1.0.1

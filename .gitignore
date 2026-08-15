@@ -1,0 +1,23 @@
+# Environment / secrets — never commit real values
+.env
+*.env
+!.env.example
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+*.log
+media/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.egg-info/
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
