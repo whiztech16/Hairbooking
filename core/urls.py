@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from booking.views import booking_page
 
 # Admin URL path is configurable via env var so it's not sitting at the
 # well-known /admin/ that every automated scanner tries first. This is
@@ -27,4 +28,5 @@ admin_path = os.environ.get("DJANGO_ADMIN_PATH", "admin/")
 urlpatterns = [
     path(admin_path, admin.site.urls),
     path('api/', include('booking.urls')),
+    path('', booking_page, name='booking-page'),
 ]

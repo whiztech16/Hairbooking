@@ -18,6 +18,24 @@ Then go to `http://127.0.0.1:8000/admin/`, log in with the superuser you just ma
 1. A **Hairstylist** (with email — this is where booking notifications go) + their **Working Hours** (inline on the same page)
 2. A few **Services** (name + default duration in minutes)
 
+### Database (Neon Postgres)
+
+The project uses SQLite locally by default (zero setup, just works) but is wired to switch to **Neon Postgres** automatically the moment you set a `DATABASE_URL` — same Django ORM either way, only the connection changes.
+
+1. Create a project at [neon.tech](https://neon.tech) (free tier)
+2. In the Neon dashboard, copy your connection string — looks like:
+   ```
+   postgresql://user:password@ep-xxxx.region.aws.neon.tech/dbname?sslmode=require
+   ```
+3. Paste it into `.env` as `DATABASE_URL`
+4. Run migrations against it:
+   ```bash
+   python manage.py migrate
+   ```
+   This creates all the tables in Neon instead of SQLite. Existing local SQLite data does NOT auto-transfer — this only matters if you already have test data in SQLite you want to keep; otherwise just re-add your hairstylists via `/admin/` after switching.
+
+Leave `DATABASE_URL` blank to keep using local SQLite (e.g. for quick local testing) — the app falls back automatically, no code changes needed either way.
+
 ### Email setup (Resend)
 
 Emails are sent via [Resend](https://resend.com) — a plain HTTPS API, so it works fine on Render and similar platforms (no SMTP port issues).

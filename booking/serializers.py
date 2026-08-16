@@ -14,7 +14,7 @@ class HairstylistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hairstylist
         fields = [
-            "id", "name", "email", "bio", "phone", "photo_url",
+            "id", "name", "email", "category", "bio", "phone", "photo_url",
             "is_active", "working_hours",
         ]
 

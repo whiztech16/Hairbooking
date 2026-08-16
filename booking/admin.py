@@ -9,7 +9,8 @@ class WorkingHoursInline(admin.TabularInline):
 
 @admin.register(Hairstylist)
 class HairstylistAdmin(admin.ModelAdmin):
-    list_display = ["name", "email", "phone", "is_active"]
+    list_display = ["name", "category", "email", "phone", "is_active"]
+    list_filter = ["category", "is_active"]
     inlines = [WorkingHoursInline]
 
 

@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 from django.utils import timezone
 from django.utils.dateparse import parse_date
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 
 from .models import Hairstylist, Service, Appointment
 from .serializers import (
@@ -33,6 +33,13 @@ from .notifications import (
 class HairstylistViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Hairstylist.objects.filter(is_active=True)
     serializer_class = HairstylistSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        category = self.request.query_params.get("category")
+        if category:
+            qs = qs.filter(category=category)
+        return qs
 
     @action(detail=True, methods=["get"])
     def availability(self, request, pk=None):
@@ -81,6 +88,18 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         hairstylist_id = self.request.query_params.get("hairstylist_id")
         if hairstylist_id:
             qs = qs.filter(hairstylist_id=hairstylist_id)
+
+        # Client self-service lookup: require BOTH email and phone together
+        # (not just one) so a client can find their own bookings without a
+        # login, without letting anyone browse other clients' appointments
+        # by guessing a single field.
+        client_email = self.request.query_params.get("client_email")
+        client_phone = self.request.query_params.get("client_phone")
+        if client_email and client_phone:
+            qs = qs.filter(client_email__iexact=client_email.strip(), client_phone=client_phone.strip())
+        elif client_email or client_phone:
+            qs = qs.none()
+
         return qs
 
     def partial_update(self, request, *args, **kwargs):
@@ -223,3 +242,11 @@ def book_appointment_view(request):
         "message": "That slot isn't available. Here are some alternatives.",
         "alternatives": result["alternatives"],
     }, status=status.HTTP_409_CONFLICT)
+
+
+def booking_page(request):
+    """Serves the client-facing booking page (book / reschedule / cancel /
+    browse hairstylists & barbers). Plain server-rendered HTML — the page
+    itself talks to the REST API below via fetch(), same-origin, no CORS
+    needed since Django is serving both."""
+    return render(request, "booking/booking.html")
