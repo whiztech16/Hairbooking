@@ -102,6 +102,41 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
         return qs
 
+    def list(self, request, *args, **kwargs):
+        """Block unfiltered listing to prevent PII enumeration.
+        Clients must supply both email + phone; staff can see everything."""
+        has_client_filter = (
+            request.query_params.get("client_email")
+            and request.query_params.get("client_phone")
+        )
+        is_staff = request.user and request.user.is_authenticated and request.user.is_staff
+        if not has_client_filter and not is_staff:
+            return Response(
+                {"error": "Provide both client_email and client_phone to look up appointments."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Require ownership (email+phone in query params) or staff access
+        to view a single appointment's details."""
+        appointment = self.get_object()
+        is_staff = request.user and request.user.is_authenticated and request.user.is_staff
+        client_email = request.query_params.get("client_email", "").strip()
+        client_phone = request.query_params.get("client_phone", "").strip()
+        is_owner = (
+            client_email
+            and client_phone
+            and appointment.client_email.lower() == client_email.lower()
+            and appointment.client_phone == client_phone
+        )
+        if not is_owner and not is_staff:
+            return Response(
+                {"error": "Provide matching client_email and client_phone to view this appointment."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().retrieve(request, *args, **kwargs)
+
     def partial_update(self, request, *args, **kwargs):
         # Block the generic PATCH /api/appointments/<id>/ entirely — only
         # the mark_ready and reschedule actions below may mutate an
@@ -111,9 +146,34 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
 
+    def _verify_ownership(self, request, appointment):
+        """Check that the request includes the correct client_email and
+        client_phone for this appointment (or is staff). Returns an error
+        Response if verification fails, or None if OK."""
+        is_staff = request.user and request.user.is_authenticated and request.user.is_staff
+        if is_staff:
+            return None
+        email = request.data.get("client_email", "").strip()
+        phone = request.data.get("client_phone", "").strip()
+        if (
+            email
+            and phone
+            and appointment.client_email.lower() == email.lower()
+            and appointment.client_phone == phone
+        ):
+            return None
+        return Response(
+            {"error": "Provide your client_email and client_phone in the request body to confirm identity."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
     def destroy(self, request, *args, **kwargs):
-        """Cancel instead of hard-delete, and notify the stylist."""
+        """Cancel instead of hard-delete, and notify the stylist.
+        Requires ownership verification (client_email + client_phone in body)."""
         appointment = self.get_object()
+        ownership_error = self._verify_ownership(request, appointment)
+        if ownership_error:
+            return ownership_error
         appointment.status = "cancelled"
         appointment.save()
         notify_cancellation(appointment)
@@ -136,10 +196,16 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["patch"])
     def reschedule(self, request, pk=None):
         """PATCH /api/appointments/<id>/reschedule/
-        Body: {"start_time": "...", "duration_minutes": 60}
-        Uses the same scheduling algorithm; returns alternatives on conflict.
+        Body: {"start_time": "...", "duration_minutes": 60,
+               "client_email": "...", "client_phone": "..."}
+        Requires ownership verification. Uses the same scheduling algorithm;
+        returns alternatives on conflict.
         """
         appointment = self.get_object()
+        ownership_error = self._verify_ownership(request, appointment)
+        if ownership_error:
+            return ownership_error
+
         serializer = RescheduleRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data

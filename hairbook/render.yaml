@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: hairbook-backend
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn core.wsgi:application"
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        value: "onboarding@resend.dev"
+      - key: DJANGO_ADMIN_PATH
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.12.4"

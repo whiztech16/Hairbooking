@@ -105,6 +105,10 @@ else:
         "http://127.0.0.1:8080",
     ]
 
+# Django 4+ requires CSRF_TRUSTED_ORIGINS for cross-origin POST requests.
+# In production this must include your frontend's https:// origin.
+CSRF_TRUSTED_ORIGINS = [o for o in CORS_ALLOWED_ORIGINS if o.startswith("https://")]
+
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
@@ -179,6 +183,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STORAGES = {
     "default": {
