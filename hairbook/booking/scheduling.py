@@ -106,7 +106,8 @@ def is_slot_available(
 
 def _free_slots_for_day(hairstylist: Hairstylist, date, duration_minutes: int, buffer_minutes: int):
     """Scan a single day and return all valid start datetimes where a
-    booking of `duration_minutes` would fit, stepping every SLOT_STEP_MINUTES."""
+    booking of `duration_minutes` would fit, stepping every SLOT_STEP_MINUTES.
+    Past slots (before the current time) are automatically excluded."""
     windows = _working_windows_for_date(hairstylist, date)
     if not windows:
         return []
@@ -115,10 +116,17 @@ def _free_slots_for_day(hairstylist: Hairstylist, date, duration_minutes: int, b
     day_end = max(w[1] for w in windows)
     existing = list(_existing_appointments(hairstylist, day_start, day_end))
 
+    now = timezone.now()
+
     free = []
     for w_start, w_end in windows:
         cursor = w_start
         while cursor + timedelta(minutes=duration_minutes) <= w_end:
+            # Skip slots that are already in the past
+            if cursor <= now:
+                cursor += timedelta(minutes=SLOT_STEP_MINUTES)
+                continue
+
             candidate_end = cursor + timedelta(minutes=duration_minutes)
             buffered_start = cursor - timedelta(minutes=buffer_minutes)
             buffered_end = candidate_end + timedelta(minutes=buffer_minutes)
