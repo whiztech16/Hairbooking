@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booking — Hairbooking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --plum-950:#2A1730;
+    --plum-800:#3D1F3D;
+    --plum-600:#5C2D5C;
+    --gold-500:#C9A227;
+    --gold-400:#DDBE4E;
+    --rose-300:#E8B4BC;
+    --cream-50:#FBF7F2;
+    --cream-100:#F3EAE0;
+    --ink-900:#241A26;
+    --ink-600:#6B5C6E;
+    --line:#E4D9CE;
+    --ok:#3F7A54;
+    --err:#B4453C;
+    --radius:14px;
+    --shadow:0 12px 30px -12px rgba(42,23,48,0.25);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream-50);
+    color:var(--ink-900);
+    font-family:'Inter',sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    margin:0;
+    color:var(--plum-950);
+  }
+  a{color:inherit;}
+
+  /* ---------- Braid motif divider (signature element) ---------- */
+  .braid-divider{
+    height:18px;
+    width:100%;
+    background-image:
+      radial-gradient(circle at 10px 4px, var(--gold-500) 4px, transparent 4.5px),
+      radial-gradient(circle at 30px 14px, var(--rose-300) 4px, transparent 4.5px),
+      radial-gradient(circle at 50px 4px, var(--gold-500) 4px, transparent 4.5px),
+      radial-gradient(circle at 70px 14px, var(--rose-300) 4px, transparent 4.5px);
+    background-size:80px 18px;
+    background-repeat:repeat-x;
+    opacity:0.9;
+  }
+
+  header.hero{
+    background:linear-gradient(160deg, var(--plum-950) 0%, var(--plum-800) 55%, var(--plum-600) 100%);
+    color:var(--cream-50);
+    padding:64px 24px 56px;
+    position:relative;
+    overflow:hidden;
+  }
+  header.hero::after{
+    content:"";
+    position:absolute;
+    right:-60px; top:-60px;
+    width:280px; height:280px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(201,162,39,0.35), transparent 70%);
+  }
+  .hero-inner{max-width:920px; margin:0 auto; position:relative;}
+  .eyebrow{
+    display:inline-block;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--gold-400);
+    font-weight:600;
+    margin-bottom:14px;
+  }
+  header.hero h1{
+    color:var(--cream-50);
+    font-size:clamp(32px,5vw,52px);
+    line-height:1.08;
+    max-width:14ch;
+  }
+  header.hero p{
+    color:var(--rose-300);
+    font-size:17px;
+    max-width:46ch;
+    margin-top:16px;
+  }
+
+  main{max-width:920px; margin:0 auto; padding:40px 24px 100px;}
+
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:28px;
+    background:var(--cream-100);
+    padding:6px;
+    border-radius:999px;
+    width:fit-content;
+  }
+  .tab-btn{
+    border:none;
+    background:transparent;
+    padding:10px 20px;
+    border-radius:999px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    color:var(--ink-600);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .tab-btn.active{
+    background:var(--plum-800);
+    color:var(--cream-50);
+  }
+
+  .panel{display:none;}
+  .panel.active{display:block; animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px;
+    margin-bottom:16px;
+    box-shadow:var(--shadow);
+  }
+
+  .stylist-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .stylist-name{font-size:20px; margin-bottom:4px;}
+  .stylist-bio{color:var(--ink-600); font-size:14px; max-width:52ch;}
+  .btn{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    border:none;
+    border-radius:10px;
+    padding:11px 20px;
+    cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--plum-800); color:#fff;}
+  .btn-primary:hover{background:var(--plum-600);}
+  .btn-gold{background:var(--gold-500); color:var(--plum-950);}
+  .btn-gold:hover{background:var(--gold-400);}
+  .btn-outline{background:transparent; color:var(--plum-800); border:1.5px solid var(--plum-800);}
+  .btn-outline:hover{background:var(--cream-100);}
+  .btn-danger{background:transparent; color:var(--err); border:1.5px solid var(--err);}
+  .btn-danger:hover{background:#FBEEEd;}
+  .btn:disabled{opacity:0.5; cursor:not-allowed;}
+
+  label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-600);
+    margin-bottom:6px;
+    margin-top:16px;
+  }
+  label:first-of-type{margin-top:0;}
+  input, select, textarea{
+    width:100%;
+    padding:11px 13px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    background:#fff;
+    color:var(--ink-900);
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color:var(--plum-600);
+    box-shadow:0 0 0 3px rgba(92,45,92,0.12);
+  }
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media(max-width:560px){.field-row{grid-template-columns:1fr;}}
+
+  .modal-backdrop{
+    position:fixed; inset:0;
+    background:rgba(36,26,38,0.55);
+    display:none;
+    align-items:center; justify-content:center;
+    padding:20px;
+    z-index:50;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:#fff;
+    border-radius:18px;
+    padding:28px;
+    max-width:480px;
+    width:100%;
+    max-height:90vh;
+    overflow-y:auto;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.35);
+  }
+  .modal-head{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    margin-bottom:4px;
+  }
+  .modal-close{
+    background:none; border:none; font-size:22px; cursor:pointer; color:var(--ink-600);
+    line-height:1; padding:4px;
+  }
+  .modal-sub{color:var(--ink-600); font-size:14px; margin-top:4px;}
+
+  .alert{
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:14px;
+    margin-top:16px;
+    display:none;
+  }
+  .alert.show{display:block;}
+  .alert-error{background:#FBEEEd; color:var(--err); border:1px solid #F0C9C5;}
+  .alert-success{background:#EAF4EC; color:var(--ok); border:1px solid #C9E3CE;}
+
+  .alt-slot{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    margin-top:8px;
+    font-size:14px;
+  }
+  .alt-slot small{color:var(--ink-600); display:block;}
+
+  .lookup-box{
+    display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
+  }
+  .lookup-box > div{flex:1; min-width:180px;}
+
+  .appt-card{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:16px; flex-wrap:wrap;
+  }
+  .appt-status{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:999px;
+    margin-bottom:8px;
+  }
+  .status-confirmed{background:#EAF4EC; color:var(--ok);}
+  .status-ready{background:#FFF3D9; color:#8A6300;}
+  .status-cancelled{background:#F1E9EC; color:var(--ink-600);}
+  .appt-actions{display:flex; gap:8px; flex-wrap:wrap;}
+
+  .empty-state{
+    text-align:center;
+    padding:40px 20px;
+    color:var(--ink-600);
+  }
+  .empty-state h3{color:var(--plum-800); margin-bottom:6px;}
+
+  .config-note{
+    font-size:12px;
+    color:var(--ink-600);
+    text-align:center;
+    margin-top:40px;
+  }
+  .config-note code{background:var(--cream-100); padding:2px 6px; border-radius:4px;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow">Book with confidence</span>
+    <h1>Find your stylist. Pick your time. Show up.</h1>
+    <p>Browse real availability, book in under a minute, and get notified the moment your stylist is ready for you — no account needed.</p>
+  </div>
+</header>
+<div class="braid-divider"></div>
+
+<main>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="browse">Browse Stylists</button>
+    <button class="tab-btn" data-tab="manage">My Appointments</button>
+  </div>
+
+  <!-- ===================== BROWSE / BOOK ===================== -->
+  <section id="panel-browse" class="panel active">
+    <div class="tabs" id="categoryTabs" style="background:transparent; padding:0; margin-bottom:20px;">
+      <button class="tab-btn category-btn active" data-category="">All</button>
+      <button class="tab-btn category-btn" data-category="hairstylist">Hairstylists</button>
+      <button class="tab-btn category-btn" data-category="barber">Barbers</button>
+    </div>
+    <div id="stylistList"></div>
+  </section>
+
+  <!-- ===================== MANAGE (lookup, cancel, reschedule) ===================== -->
+  <section id="panel-manage" class="panel">
+    <div class="card">
+      <h3 style="margin-bottom:14px;">Find your appointments</h3>
+      <p style="color:var(--ink-600); font-size:14px; margin-bottom:16px;">
+        Enter the email and phone number you used when booking — we match both together to keep your appointments private.
+      </p>
+      <div class="lookup-box">
+        <div>
+          <label>Email</label>
+          <input type="email" id="lookupEmail" placeholder="you@example.com">
+        </div>
+        <div>
+          <label>Phone</label>
+          <input type="text" id="lookupPhone" placeholder="0800 000 0000">
+        </div>
+        <button class="btn btn-primary" id="lookupBtn" style="height:44px;">Find</button>
+      </div>
+      <div class="alert alert-error" id="lookupError"></div>
+    </div>
+    <div id="apptResults"></div>
+  </section>
+</main>
+
+<!-- ===================== BOOKING MODAL ===================== -->
+<div class="modal-backdrop" id="bookModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3 id="bookModalTitle">Book Appointment</h3>
+        <div class="modal-sub" id="bookModalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('bookModal')">&times;</button>
+    </div>
+
+    <label>Date</label>
+    <input type="date" id="bookDate">
+
+    <label>Available times</label>
+    <select id="bookSlot"><option value="">Pick a date first</option></select>
+
+    <div class="field-row">
+      <div>
+        <label>Your name</label>
+        <input type="text" id="bookName" placeholder="Jane Doe">
+      </div>
+      <div>
+        <label>Phone number</label>
+        <input type="text" id="bookPhone" placeholder="0800 000 0000">
+      </div>
+    </div>
+
+    <label>Email</label>
+    <input type="email" id="bookEmail" placeholder="you@example.com">
+
+    <label>Notes (optional)</label>
+    <textarea id="bookNotes" rows="2" placeholder="Anything your stylist should know"></textarea>
+
+    <button class="btn btn-gold" id="bookSubmitBtn" style="width:100%; margin-top:20px; padding:13px;">Confirm Booking</button>
+
+    <div class="alert alert-error" id="bookError"></div>
+    <div class="alert alert-success" id="bookSuccess"></div>
+    <div id="bookAlternatives"></div>
+  </div>
+</div>
+
+<!-- ===================== RESCHEDULE MODAL ===================== -->
+<div class="modal-backdrop" id="rescheduleModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Reschedule</h3>
+      <button class="modal-close" onclick="closeModal('rescheduleModal')">&times;</button>
+    </div>
+    <label>New date</label>
+    <input type="date" id="reschedDate">
+    <label>New time</label>
+    <select id="reschedSlot"><option value="">Pick a date first</option></select>
+    <button class="btn btn-gold" id="reschedSubmitBtn" style="width:100%; margin-top:20px; padding:13px;">Confirm New Time</button>
+    <div class="alert alert-error" id="reschedError"></div>
+    <div class="alert alert-success" id="reschedSuccess"></div>
+    <div id="reschedAlternatives"></div>
+  </div>
+</div>
+
+<p class="config-note">Hairbooking — a scheduling platform for hairstylists and barbers.</p>
+
+<script>
+/* =========================================================
+   CONFIG — relative path works because Django now serves this
+   page from the same origin as the API. If you ever split the
+   frontend out to its own host again, set an absolute URL here.
+   ========================================================= */
+const API_BASE = "/api";
+
+let currentBookingStylist = null;   // {id, name, defaultDuration}
+let currentReschedule = null;       // {appointmentId, hairstylistId, duration}
+
+/* ---------------- Tabs ---------------- */
+document.querySelectorAll(".tabs > .tab-btn:not(.category-btn)").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tabs > .tab-btn:not(.category-btn)").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+  });
+});
+
+/* ---------------- Category filter (Hairstylists / Barbers / All) ---------------- */
+let currentCategory = "";
+document.querySelectorAll(".category-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentCategory = btn.dataset.category;
+    loadStylists();
+  });
+});
+
+function closeModal(id){
+  document.getElementById(id).classList.remove("open");
+}
+function openModal(id){
+  document.getElementById(id).classList.add("open");
+}
+
+/* ---------------- Load stylists ---------------- */
+async function loadStylists(){
+  const container = document.getElementById("stylistList");
+  container.innerHTML = `<div class="empty-state">Loading…</div>`;
+  try{
+    const url = currentCategory
+      ? `${API_BASE}/hairstylists/?category=${currentCategory}`
+      : `${API_BASE}/hairstylists/`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const stylists = data.results || data;
+    if(!stylists.length){
+      container.innerHTML = `<div class="empty-state"><h3>Nobody here yet</h3><p>Add one via the Django admin panel.</p></div>`;
+      return;
+    }
+    container.innerHTML = "";
+    stylists.forEach(s => {
+      const el = document.createElement("div");
+      el.className = "card stylist-card";
+      const categoryLabel = s.category === "barber" ? "Barber" : "Hairstylist";
+      el.innerHTML = `
+        <div>
+          <span class="appt-status status-confirmed" style="margin-bottom:6px;">${categoryLabel}</span>
+          <div class="stylist-name">${escapeHtml(s.name)}</div>
+          <div class="stylist-bio">${escapeHtml(s.bio || "No bio yet.")}</div>
+        </div>
+        <button class="btn btn-primary" data-id="${s.id}" data-name="${escapeHtml(s.name)}">Book Now</button>
+      `;
+      el.querySelector("button").addEventListener("click", () => startBooking(s.id, s.name));
+      container.appendChild(el);
+    });
+  }catch(err){
+    container.innerHTML = `<div class="empty-state"><h3>Couldn't reach the server</h3><p>Check that Django is running and this page is served from the same origin as the API.</p></div>`;
+  }
+}
+
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str ?? "";
+  return d.innerHTML;
+}
+
+/* ---------------- Booking flow ---------------- */
+function startBooking(id, name){
+  currentBookingStylist = { id, name };
+  document.getElementById("bookModalTitle").textContent = "Book with " + name;
+  document.getElementById("bookModalSub").textContent = "Pick a date to see open times.";
+  ["bookName","bookPhone","bookEmail","bookNotes"].forEach(f => document.getElementById(f).value = "");
+  document.getElementById("bookSlot").innerHTML = `<option value="">Pick a date first</option>`;
+  hideAlert("bookError"); hideAlert("bookSuccess");
+  document.getElementById("bookAlternatives").innerHTML = "";
+  const dateInput = document.getElementById("bookDate");
+  dateInput.value = "";
+  dateInput.min = new Date().toISOString().split("T")[0];
+  openModal("bookModal");
+}
+
+document.getElementById("bookDate").addEventListener("change", async (e) => {
+  await populateSlots(e.target.value, currentBookingStylist?.id, "bookSlot");
+});
+
+async function populateSlots(dateStr, stylistId, selectId, durationMinutes = 60){
+  const select = document.getElementById(selectId);
+  if(!dateStr || !stylistId){
+    select.innerHTML = `<option value="">Pick a date first</option>`;
+    return;
+  }
+  select.innerHTML = `<option value="">Loading…</option>`;
+  try{
+    const res = await fetch(`${API_BASE}/hairstylists/${stylistId}/availability/?date=${dateStr}&duration_minutes=${durationMinutes}`);
+    const data = await res.json();
+    const slots = data.available_slots || [];
+    if(!slots.length){
+      select.innerHTML = `<option value="">No open slots this day</option>`;
+      return;
+    }
+    select.innerHTML = slots.map(s => {
+      const t = new Date(s);
+      const label = t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      return `<option value="${s}">${label}</option>`;
+    }).join("");
+  }catch(err){
+    select.innerHTML = `<option value="">Couldn't load times</option>`;
+  }
+}
+
+function showAlert(id, msg){
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add("show");
+}
+function hideAlert(id){
+  document.getElementById(id).classList.remove("show");
+}
+
+document.getElementById("bookSubmitBtn").addEventListener("click", async () => {
+  hideAlert("bookError"); hideAlert("bookSuccess");
+  document.getElementById("bookAlternatives").innerHTML = "";
+
+  const slot = document.getElementById("bookSlot").value;
+  const name = document.getElementById("bookName").value.trim();
+  const phone = document.getElementById("bookPhone").value.trim();
+  const email = document.getElementById("bookEmail").value.trim();
+  const notes = document.getElementById("bookNotes").value.trim();
+
+  if(!slot){ showAlert("bookError", "Pick an available time first."); return; }
+  if(!name || !phone || !email){ showAlert("bookError", "Name, phone, and email are all required."); return; }
+
+  const btn = document.getElementById("bookSubmitBtn");
+  btn.disabled = true; btn.textContent = "Booking…";
+
+  try{
+    const res = await fetch(`${API_BASE}/appointments/book/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        hairstylist_id: currentBookingStylist.id,
+        client_name: name,
+        client_phone: phone,
+        client_email: email,
+        start_time: slot,
+        duration_minutes: 60,
+        notes,
+      }),
+    });
+    const data = await res.json();
+
+    if(res.status === 201 && data.success){
+      showAlert("bookSuccess", "Booked! A confirmation email is on its way.");
+      document.getElementById("bookSlot").innerHTML = `<option value="">Booked ✓</option>`;
+      if(data.appointment && data.appointment.google_calendar_link){
+        const calDiv = document.createElement("div");
+        calDiv.style.marginTop = "14px";
+        calDiv.innerHTML = `<a href="${data.appointment.google_calendar_link}" target="_blank" rel="noopener" class="btn btn-outline" style="display:inline-block; text-decoration:none;">📅 Add to Google Calendar</a>`;
+        document.getElementById("bookAlternatives").innerHTML = "";
+        document.getElementById("bookAlternatives").appendChild(calDiv);
+      }
+    } else if(data.reason === "duplicate"){
+      showAlert("bookError", data.message);
+    } else if(data.reason === "conflict"){
+      showAlert("bookError", data.message);
+      renderAlternatives(data.alternatives, "bookAlternatives", (alt) => {
+        // Jump the modal to the alternative's stylist/time.
+        currentBookingStylist = { id: alt.hairstylist_id, name: alt.hairstylist_name };
+        document.getElementById("bookModalTitle").textContent = "Book with " + alt.hairstylist_name;
+        const d = new Date(alt.start_time);
+        document.getElementById("bookDate").value = d.toISOString().split("T")[0];
+        populateSlots(d.toISOString().split("T")[0], alt.hairstylist_id, "bookSlot").then(() => {
+          document.getElementById("bookSlot").value = alt.start_time;
+        });
+        document.getElementById("bookAlternatives").innerHTML = "";
+        hideAlert("bookError");
+      });
+    } else {
+      showAlert("bookError", data.message || "Something went wrong. Please check the details and try again.");
+    }
+  }catch(err){
+    showAlert("bookError", "Couldn't reach the server.");
+  }finally{
+    btn.disabled = false; btn.textContent = "Confirm Booking";
+  }
+});
+
+function renderAlternatives(alternatives, containerId, onPick){
+  const container = document.getElementById(containerId);
+  if(!alternatives || !alternatives.length){ container.innerHTML = ""; return; }
+  container.innerHTML = `<div style="margin-top:14px; font-size:13px; font-weight:600; color:var(--ink-600);">Try one of these instead:</div>`;
+  alternatives.forEach(alt => {
+    const t = new Date(alt.start_time);
+    const label = t.toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    const row = document.createElement("div");
+    row.className = "alt-slot";
+    row.innerHTML = `
+      <div>
+        <strong>${escapeHtml(alt.hairstylist_name)}</strong>
+        <small>${label}${alt.same_stylist ? "" : " · different stylist"}</small>
+      </div>
+      <button class="btn btn-outline" style="padding:7px 14px; font-size:13px;">Use this</button>
+    `;
+    row.querySelector("button").addEventListener("click", () => onPick(alt));
+    container.appendChild(row);
+  });
+}
+
+/* ---------------- My Appointments (lookup) ---------------- */
+document.getElementById("lookupBtn").addEventListener("click", lookupAppointments);
+
+async function lookupAppointments(){
+  hideAlert("lookupError");
+  const email = document.getElementById("lookupEmail").value.trim();
+  const phone = document.getElementById("lookupPhone").value.trim();
+  const results = document.getElementById("apptResults");
+
+  if(!email || !phone){
+    showAlert("lookupError", "Enter both email and phone — we need both to find your bookings.");
+    return;
+  }
+
+  results.innerHTML = `<div class="empty-state">Searching…</div>`;
+  try{
+    const res = await fetch(`${API_BASE}/appointments/?client_email=${encodeURIComponent(email)}&client_phone=${encodeURIComponent(phone)}`);
+    const data = await res.json();
+    const appts = data.results || data;
+
+    if(!appts.length){
+      results.innerHTML = `<div class="empty-state"><h3>No appointments found</h3><p>Double-check the email and phone you booked with.</p></div>`;
+      return;
+    }
+
+    results.innerHTML = "";
+    appts.sort((a,b) => new Date(a.start_time) - new Date(b.start_time));
+    appts.forEach(a => results.appendChild(renderAppointmentCard(a)));
+  }catch(err){
+    results.innerHTML = `<div class="empty-state"><h3>Couldn't reach the server</h3></div>`;
+  }
+}
+
+function renderAppointmentCard(appt){
+  const el = document.createElement("div");
+  el.className = "card appt-card";
+  const start = new Date(appt.start_time);
+  const dateLabel = start.toLocaleString([], { weekday: "long", month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const statusClass = appt.status === "ready" ? "status-ready" : appt.status === "cancelled" ? "status-cancelled" : "status-confirmed";
+  const canAct = appt.status === "confirmed" || appt.status === "ready";
+
+  el.innerHTML = `
+    <div>
+      <span class="appt-status ${statusClass}">${escapeHtml(appt.status)}</span>
+      <div style="font-size:17px; font-weight:600; color:var(--plum-950);">${escapeHtml(appt.hairstylist_name)}</div>
+      <div style="color:var(--ink-600); font-size:14px; margin-top:2px;">${dateLabel}</div>
+    </div>
+    <div class="appt-actions">
+      ${canAct ? `<button class="btn btn-outline resched-btn">Reschedule</button>` : ""}
+      ${canAct ? `<button class="btn btn-danger cancel-btn">Cancel</button>` : ""}
+    </div>
+  `;
+
+  if(canAct){
+    el.querySelector(".resched-btn").addEventListener("click", () => startReschedule(appt));
+    el.querySelector(".cancel-btn").addEventListener("click", () => cancelAppointment(appt, el));
+  }
+  return el;
+}
+
+async function cancelAppointment(appt, cardEl){
+  if(!confirm(`Cancel your appointment with ${appt.hairstylist_name}?`)) return;
+  try{
+    const res = await fetch(`${API_BASE}/appointments/${appt.id}/`, { method: "DELETE" });
+    if(res.ok){
+      lookupAppointments();
+    } else {
+      alert("Couldn't cancel — please try again.");
+    }
+  }catch(err){
+    alert("Couldn't reach the server.");
+  }
+}
+
+function startReschedule(appt){
+  currentReschedule = {
+    appointmentId: appt.id,
+    hairstylistId: appt.hairstylist,
+    duration: Math.round((new Date(appt.end_time) - new Date(appt.start_time)) / 60000),
+  };
+  hideAlert("reschedError"); hideAlert("reschedSuccess");
+  document.getElementById("reschedAlternatives").innerHTML = "";
+  document.getElementById("reschedSlot").innerHTML = `<option value="">Pick a date first</option>`;
+  const dateInput = document.getElementById("reschedDate");
+  dateInput.value = "";
+  dateInput.min = new Date().toISOString().split("T")[0];
+  openModal("rescheduleModal");
+}
+
+document.getElementById("reschedDate").addEventListener("change", async (e) => {
+  await populateSlots(e.target.value, currentReschedule?.hairstylistId, "reschedSlot", currentReschedule?.duration || 60);
+});
+
+document.getElementById("reschedSubmitBtn").addEventListener("click", async () => {
+  hideAlert("reschedError"); hideAlert("reschedSuccess");
+  document.getElementById("reschedAlternatives").innerHTML = "";
+  const slot = document.getElementById("reschedSlot").value;
+  if(!slot){ showAlert("reschedError", "Pick a new time first."); return; }
+
+  const btn = document.getElementById("reschedSubmitBtn");
+  btn.disabled = true; btn.textContent = "Saving…";
+
+  try{
+    const res = await fetch(`${API_BASE}/appointments/${currentReschedule.appointmentId}/reschedule/`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ start_time: slot }),
+    });
+    const data = await res.json();
+
+    if(res.status === 200 && data.success){
+      showAlert("reschedSuccess", "Rescheduled! Both you and your stylist have been emailed.");
+      setTimeout(() => { closeModal("rescheduleModal"); lookupAppointments(); }, 1500);
+    } else if(data.alternatives){
+      showAlert("reschedError", data.message);
+      renderAlternatives(data.alternatives, "reschedAlternatives", (alt) => {
+        const d = new Date(alt.start_time);
+        document.getElementById("reschedDate").value = d.toISOString().split("T")[0];
+        populateSlots(d.toISOString().split("T")[0], currentReschedule.hairstylistId, "reschedSlot", currentReschedule.duration).then(() => {
+          document.getElementById("reschedSlot").value = alt.start_time;
+        });
+        document.getElementById("reschedAlternatives").innerHTML = "";
+        hideAlert("reschedError");
+      });
+    } else {
+      showAlert("reschedError", data.message || "Couldn't reschedule.");
+    }
+  }catch(err){
+    showAlert("reschedError", "Couldn't reach the server.");
+  }finally{
+    btn.disabled = false; btn.textContent = "Confirm New Time";
+  }
+});
+
+/* ---------------- Init ---------------- */
+loadStylists();
+</script>
+</body>
+</html>
