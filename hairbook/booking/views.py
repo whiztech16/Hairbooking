@@ -241,6 +241,27 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
 
 @api_view(["POST"])
+def lookup_appointments_view(request):
+    """POST /api/appointments/lookup/
+    Body: {"client_email": "...", "client_phone": "..."}
+    Returns the client's appointments without leaking PII in URL/query params.
+    """
+    email = (request.data.get("client_email") or "").strip()
+    phone = (request.data.get("client_phone") or "").strip()
+    if not email or not phone:
+        return Response(
+            {"error": "Both client_email and client_phone are required."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    appointments = Appointment.objects.filter(
+        client_email__iexact=email,
+        client_phone=phone,
+    )
+    serializer = AppointmentSerializer(appointments, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["POST"])
 def book_appointment_view(request):
     """POST /api/appointments/book/
     Body: {

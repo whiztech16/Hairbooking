@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -394,6 +395,7 @@
 
 <p class="config-note">Hairbooking — a scheduling platform for hairstylists and barbers.</p>
 
+{% csrf_token %}
 <script>
 /* =========================================================
    CONFIG — relative path works because Django now serves this
@@ -401,6 +403,15 @@
    frontend out to its own host again, set an absolute URL here.
    ========================================================= */
 const API_BASE = "/api";
+
+/* ---------- CSRF helper ---------- */
+function getCSRFToken() {
+  const el = document.querySelector('[name=csrfmiddlewaretoken]');
+  if (el) return el.value;
+  // fallback: read from cookie
+  const m = document.cookie.match(/csrftoken=([^;]+)/);
+  return m ? m[1] : '';
+}
 
 let currentBookingStylist = null;   // {id, name, defaultDuration}
 let currentReschedule = null;       // {appointmentId, hairstylistId, duration}
@@ -547,7 +558,7 @@ document.getElementById("bookSubmitBtn").addEventListener("click", async () => {
   try{
     const res = await fetch(`${API_BASE}/appointments/book/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() },
       body: JSON.stringify({
         hairstylist_id: currentBookingStylist.id,
         client_name: name,
@@ -633,7 +644,11 @@ async function lookupAppointments(){
 
   results.innerHTML = `<div class="empty-state">Searching…</div>`;
   try{
-    const res = await fetch(`${API_BASE}/appointments/?client_email=${encodeURIComponent(email)}&client_phone=${encodeURIComponent(phone)}`);
+    const res = await fetch(`${API_BASE}/appointments/lookup/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() },
+      body: JSON.stringify({ client_email: email, client_phone: phone }),
+    });
     const data = await res.json();
     const appts = data.results || data;
 
@@ -680,7 +695,14 @@ function renderAppointmentCard(appt){
 async function cancelAppointment(appt, cardEl){
   if(!confirm(`Cancel your appointment with ${appt.hairstylist_name}?`)) return;
   try{
-    const res = await fetch(`${API_BASE}/appointments/${appt.id}/`, { method: "DELETE" });
+    const res = await fetch(`${API_BASE}/appointments/${appt.id}/`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() },
+      body: JSON.stringify({
+        client_email: document.getElementById("lookupEmail").value.trim(),
+        client_phone: document.getElementById("lookupPhone").value.trim(),
+      }),
+    });
     if(res.ok){
       lookupAppointments();
     } else {
@@ -722,8 +744,12 @@ document.getElementById("reschedSubmitBtn").addEventListener("click", async () =
   try{
     const res = await fetch(`${API_BASE}/appointments/${currentReschedule.appointmentId}/reschedule/`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ start_time: slot }),
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() },
+      body: JSON.stringify({
+        start_time: slot,
+        client_email: document.getElementById("lookupEmail").value.trim(),
+        client_phone: document.getElementById("lookupPhone").value.trim(),
+      }),
     });
     const data = await res.json();
 
