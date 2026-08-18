@@ -408,24 +408,79 @@
   }
   .card:hover{box-shadow:var(--shadow);}
 
-  .stylist-card{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:14px;
-    gap:16px;
+  /* Stylist grid */
+  .stylist-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+    gap:20px;
   }
+  .stylist-card{
+    background:#fff;
+    border-radius:var(--radius-lg);
+    overflow:hidden;
+    box-shadow:0 2px 12px rgba(0,0,0,0.06);
+    transition:transform 0.3s, box-shadow 0.3s;
+    display:flex;
+    flex-direction:column;
+  }
+  .stylist-card:hover{
+    transform:translateY(-4px);
+    box-shadow:var(--shadow-lg);
+  }
+  .stylist-card-img{
+    width:100%;
+    aspect-ratio:1/1;
+    object-fit:cover;
+    background:var(--cream-200);
+  }
+  .stylist-card-body{
+    padding:20px;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+  }
+  .stylist-card-badge{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.8px;
+    padding:4px 12px;
+    border-radius:50px;
+    margin-bottom:10px;
+    width:fit-content;
+  }
+  .badge-hairstylist{background:#F3E8FF; color:#7C3AED;}
+  .badge-barber{background:#E0F2FE; color:#0369A1;}
+  .badge-nail_tech{background:#FDE8E7; color:#C2410C;}
   .stylist-name{
     font-family:'Fraunces',serif;
-    font-size:18px;
+    font-size:20px;
     font-weight:600;
     color:var(--plum-950);
+    margin-bottom:6px;
   }
   .stylist-bio{
     font-size:13px;
     color:var(--ink-600);
-    margin-top:4px;
     line-height:1.5;
+    margin-bottom:8px;
+  }
+  .stylist-meta{
+    font-size:12px;
+    color:var(--ink-400);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:4px;
+  }
+  .stylist-meta svg{
+    width:14px; height:14px;
+    flex-shrink:0;
+  }
+  .stylist-card-footer{
+    margin-top:auto;
+    padding-top:14px;
   }
   .appt-status{
     display:inline-block;
@@ -806,7 +861,7 @@
     <p>Browse available professionals and book in just a few taps.</p>
   </div>
 
-  <div style="max-width:700px; margin:0 auto;">
+  <div style="max-width:900px; margin:0 auto;">
     <div class="tabs">
       <button class="tab-btn active" data-tab="browse">Browse Pros</button>
       <button class="tab-btn" data-tab="manage">My Appointments</button>
@@ -1023,22 +1078,35 @@ async function loadStylists(){
       return;
     }
     container.innerHTML = "";
+    const grid = document.createElement("div");
+    grid.className = "stylist-grid";
     stylists.forEach(s => {
       const el = document.createElement("div");
-      el.className = "card stylist-card";
+      el.className = "stylist-card";
       const categoryLabels = { hairstylist: "Hairstylist", barber: "Barber", nail_tech: "Nail Tech" };
       const categoryLabel = categoryLabels[s.category] || "Professional";
+      const badgeClass = `badge-${s.category || 'hairstylist'}`;
+      const imgSrc = s.image_url || '';
+      const imgTag = imgSrc
+        ? `<img class="stylist-card-img" src="${escapeHtml(imgSrc)}" alt="${escapeHtml(s.name)}" loading="lazy">`
+        : `<div class="stylist-card-img" style="display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--ink-400);">✂️</div>`;
       el.innerHTML = `
-        <div>
-          <span class="appt-status status-confirmed" style="margin-bottom:6px;">${categoryLabel}</span>
+        ${imgTag}
+        <div class="stylist-card-body">
+          <span class="stylist-card-badge ${badgeClass}">${categoryLabel}</span>
           <div class="stylist-name">${escapeHtml(s.name)}</div>
-          <div class="stylist-bio">${escapeHtml(s.bio || "No bio yet.")}</div>
+          ${s.bio ? `<div class="stylist-bio">${escapeHtml(s.bio)}</div>` : ''}
+          ${s.address ? `<div class="stylist-meta"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>${escapeHtml(s.address)}</div>` : ''}
+          <div class="stylist-meta"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>${escapeHtml(s.working_hours_summary || 'Hours not set')}</div>
+          <div class="stylist-card-footer">
+            <button class="btn btn-gold" style="width:100%; padding:12px;">Book Now</button>
+          </div>
         </div>
-        <button class="btn btn-primary" data-id="${s.id}" data-name="${escapeHtml(s.name)}">Book Now</button>
       `;
       el.querySelector("button").addEventListener("click", () => startBooking(s.id, s.name));
-      container.appendChild(el);
+      grid.appendChild(el);
     });
+    container.appendChild(grid);
   }catch(err){
     container.innerHTML = `<div class="empty-state"><h3>Couldn't reach the server</h3><p>Please try again in a moment.</p></div>`;
   }

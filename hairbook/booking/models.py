@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from cloudinary.models import CloudinaryField
 
 
 WEEKDAYS = [
@@ -28,7 +29,12 @@ class Hairstylist(models.Model):
     )
     bio = models.TextField(blank=True)
     phone = models.CharField(max_length=30, blank=True)
-    photo_url = models.URLField(blank=True)
+    address = models.CharField(max_length=300, blank=True, help_text="Salon/shop address shown on the booking card")
+    photo = CloudinaryField(
+        'image', blank=True, null=True,
+        help_text="Profile photo uploaded via admin. Stored on Cloudinary.",
+    )
+    photo_url = models.URLField(blank=True, help_text="External photo URL (fallback if no uploaded photo)")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

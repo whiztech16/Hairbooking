@@ -10,13 +10,36 @@ class WorkingHoursSerializer(serializers.ModelSerializer):
 
 class HairstylistSerializer(serializers.ModelSerializer):
     working_hours = WorkingHoursSerializer(many=True, read_only=True)
+    image_url = serializers.SerializerMethodField()
+    working_hours_summary = serializers.SerializerMethodField()
 
     class Meta:
         model = Hairstylist
         fields = [
-            "id", "name", "email", "category", "bio", "phone", "photo_url",
-            "is_active", "working_hours",
+            "id", "name", "email", "category", "bio", "phone", "address",
+            "photo_url", "image_url", "is_active", "working_hours",
+            "working_hours_summary",
         ]
+
+    def get_image_url(self, obj):
+        """Return Cloudinary photo URL if available, else fallback to photo_url."""
+        if obj.photo:
+            return obj.photo.url
+        return obj.photo_url or ""
+
+    def get_working_hours_summary(self, obj):
+        """Return a short human-readable summary like 'Mon 9am-5pm'."""
+        hours = obj.working_hours.all()
+        if not hours:
+            return "Hours not set"
+        days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        parts = []
+        for wh in hours:
+            day = days[wh.weekday] if wh.weekday < len(days) else "?"
+            start = wh.start_time.strftime("%I:%M%p").lstrip("0").lower()
+            end = wh.end_time.strftime("%I:%M%p").lstrip("0").lower()
+            parts.append(f"{day} {start}-{end}")
+        return ", ".join(parts[:3]) + ("…" if len(parts) > 3 else "")
 
 
 class ServiceSerializer(serializers.ModelSerializer):
