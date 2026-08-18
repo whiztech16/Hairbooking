@@ -17,13 +17,14 @@ class Hairstylist(models.Model):
     CATEGORY_CHOICES = [
         ("hairstylist", "Hairstylist"),
         ("barber", "Barber"),
+        ("nail_tech", "Nail Tech"),
     ]
 
     name = models.CharField(max_length=150)
     email = models.EmailField(help_text="Used to notify the stylist of new bookings")
     category = models.CharField(
         max_length=20, choices=CATEGORY_CHOICES, default="hairstylist",
-        help_text="Lets clients filter between hairstylists and barbers when browsing.",
+        help_text="Lets clients filter between hairstylists, barbers, and nail techs when browsing.",
     )
     bio = models.TextField(blank=True)
     phone = models.CharField(max_length=30, blank=True)

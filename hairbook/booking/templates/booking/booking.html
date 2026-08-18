@@ -4,267 +4,617 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Booking — Hairbooking</title>
+<title>Hairbooking — Book Barbers, Hairstylists & Nail Techs</title>
+<meta name="description" content="Find and book the best barbers, hairstylists, and nail technicians near you. Browse real availability, book in under a minute, and get notified when your pro is ready.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --plum-950:#2A1730;
+    --plum-950:#1A0E20;
     --plum-800:#3D1F3D;
     --plum-600:#5C2D5C;
     --gold-500:#C9A227;
     --gold-400:#DDBE4E;
+    --gold-300:#E8D48A;
     --rose-300:#E8B4BC;
     --cream-50:#FBF7F2;
     --cream-100:#F3EAE0;
+    --cream-200:#E8DDD2;
     --ink-900:#241A26;
+    --ink-700:#4A3D4E;
     --ink-600:#6B5C6E;
+    --ink-400:#9B8F9E;
     --line:#E4D9CE;
     --ok:#3F7A54;
     --err:#B4453C;
     --radius:14px;
+    --radius-lg:20px;
     --shadow:0 12px 30px -12px rgba(42,23,48,0.25);
+    --shadow-lg:0 24px 48px -16px rgba(42,23,48,0.3);
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
   body{
     background:var(--cream-50);
     color:var(--ink-900);
     font-family:'Inter',sans-serif;
-    line-height:1.5;
+    line-height:1.6;
     -webkit-font-smoothing:antialiased;
   }
   h1,h2,h3{
     font-family:'Fraunces',serif;
     font-weight:600;
-    margin:0;
+    line-height:1.15;
+  }
+  a{color:inherit; text-decoration:none;}
+
+  /* ================== NAV ================== */
+  .nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 40px;
+    background:transparent;
+    transition:background 0.4s, box-shadow 0.4s, padding 0.3s;
+  }
+  .nav.scrolled{
+    background:rgba(26,14,32,0.95);
+    backdrop-filter:blur(12px);
+    box-shadow:0 2px 20px rgba(0,0,0,0.3);
+    padding:12px 40px;
+  }
+  .nav-brand{
+    font-family:'Fraunces',serif;
+    font-size:24px;
+    font-weight:700;
+    color:#fff;
+    letter-spacing:-0.5px;
+  }
+  .nav-brand span{color:var(--gold-400);}
+  .nav-links{display:flex; align-items:center; gap:32px;}
+  .nav-links a{
+    color:rgba(255,255,255,0.85);
+    font-size:14px;
+    font-weight:500;
+    transition:color 0.2s;
+  }
+  .nav-links a:hover{color:#fff;}
+  .btn-nav{
+    background:var(--gold-500);
     color:var(--plum-950);
+    padding:10px 24px;
+    border-radius:50px;
+    font-weight:600;
+    font-size:14px;
+    border:none;
+    cursor:pointer;
+    transition:all 0.3s;
+    text-decoration:none;
   }
-  a{color:inherit;}
-
-  /* ---------- Braid motif divider (signature element) ---------- */
-  .braid-divider{
-    height:18px;
-    width:100%;
-    background-image:
-      radial-gradient(circle at 10px 4px, var(--gold-500) 4px, transparent 4.5px),
-      radial-gradient(circle at 30px 14px, var(--rose-300) 4px, transparent 4.5px),
-      radial-gradient(circle at 50px 4px, var(--gold-500) 4px, transparent 4.5px),
-      radial-gradient(circle at 70px 14px, var(--rose-300) 4px, transparent 4.5px);
-    background-size:80px 18px;
-    background-repeat:repeat-x;
-    opacity:0.9;
+  .btn-nav:hover{
+    background:var(--gold-400);
+    transform:translateY(-1px);
+    box-shadow:0 4px 16px rgba(201,162,39,0.4);
   }
 
-  header.hero{
-    background:linear-gradient(160deg, var(--plum-950) 0%, var(--plum-800) 55%, var(--plum-600) 100%);
-    color:var(--cream-50);
-    padding:64px 24px 56px;
+  /* ================== HERO ================== */
+  .hero{
     position:relative;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
     overflow:hidden;
   }
-  header.hero::after{
-    content:"";
-    position:absolute;
-    right:-60px; top:-60px;
-    width:280px; height:280px;
-    border-radius:50%;
-    background:radial-gradient(circle, rgba(201,162,39,0.35), transparent 70%);
+  .hero-bg{
+    position:absolute; inset:0;
+    background:url("{% static 'booking/images/hero.jpg' %}") center/cover no-repeat;
   }
-  .hero-inner{max-width:920px; margin:0 auto; position:relative;}
-  .eyebrow{
+  .hero-overlay{
+    position:absolute; inset:0;
+    background:linear-gradient(
+      135deg,
+      rgba(26,14,32,0.88) 0%,
+      rgba(26,14,32,0.72) 40%,
+      rgba(26,14,32,0.55) 100%
+    );
+  }
+  .hero-content{
+    position:relative; z-index:2;
+    max-width:740px;
+    padding:140px 40px 100px;
+  }
+  .hero-eyebrow{
     display:inline-block;
-    font-size:12px;
-    letter-spacing:0.14em;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:2px;
     text-transform:uppercase;
     color:var(--gold-400);
+    margin-bottom:20px;
+    padding:6px 16px;
+    border:1px solid rgba(221,190,78,0.3);
+    border-radius:50px;
+  }
+  .hero h1{
+    font-size:clamp(36px, 5vw, 62px);
+    color:#fff;
+    margin-bottom:24px;
+    letter-spacing:-1px;
+  }
+  .hero h1 em{
+    font-style:normal;
+    color:var(--gold-400);
+  }
+  .hero-sub{
+    font-size:18px;
+    color:rgba(255,255,255,0.75);
+    max-width:560px;
+    margin-bottom:40px;
+    line-height:1.7;
+  }
+  .hero-actions{display:flex; gap:16px; flex-wrap:wrap;}
+  .btn-hero-primary{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--gold-500);
+    color:var(--plum-950);
+    padding:16px 36px;
+    border-radius:50px;
+    font-weight:700;
+    font-size:16px;
+    border:none;
+    cursor:pointer;
+    transition:all 0.3s;
+    text-decoration:none;
+  }
+  .btn-hero-primary:hover{
+    background:var(--gold-400);
+    transform:translateY(-2px);
+    box-shadow:0 8px 30px rgba(201,162,39,0.45);
+  }
+  .btn-hero-outline{
+    display:inline-flex; align-items:center; gap:8px;
+    background:transparent;
+    color:#fff;
+    padding:16px 36px;
+    border-radius:50px;
     font-weight:600;
-    margin-bottom:14px;
+    font-size:16px;
+    border:1.5px solid rgba(255,255,255,0.3);
+    cursor:pointer;
+    transition:all 0.3s;
+    text-decoration:none;
   }
-  header.hero h1{
-    color:var(--cream-50);
-    font-size:clamp(32px,5vw,52px);
-    line-height:1.08;
-    max-width:14ch;
-  }
-  header.hero p{
-    color:var(--rose-300);
-    font-size:17px;
-    max-width:46ch;
-    margin-top:16px;
+  .btn-hero-outline:hover{
+    border-color:rgba(255,255,255,0.6);
+    background:rgba(255,255,255,0.08);
   }
 
-  main{max-width:920px; margin:0 auto; padding:40px 24px 100px;}
+  /* Stats row */
+  .hero-stats{
+    display:flex; gap:48px;
+    margin-top:60px;
+    padding-top:32px;
+    border-top:1px solid rgba(255,255,255,0.12);
+  }
+  .stat-item{text-align:left;}
+  .stat-number{
+    font-family:'Fraunces',serif;
+    font-size:28px;
+    font-weight:700;
+    color:var(--gold-400);
+  }
+  .stat-label{
+    font-size:13px;
+    color:rgba(255,255,255,0.55);
+    margin-top:2px;
+  }
+
+  /* ================== CATEGORIES SECTION ================== */
+  .section{
+    padding:100px 40px;
+  }
+  .section-header{
+    text-align:center;
+    max-width:600px;
+    margin:0 auto 60px;
+  }
+  .section-eyebrow{
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--gold-500);
+    margin-bottom:12px;
+  }
+  .section-header h2{
+    font-size:clamp(28px, 4vw, 44px);
+    color:var(--plum-950);
+    margin-bottom:16px;
+  }
+  .section-header p{
+    font-size:16px;
+    color:var(--ink-600);
+    line-height:1.7;
+  }
+
+  .categories-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:28px;
+    max-width:1100px;
+    margin:0 auto;
+  }
+  .category-card{
+    position:relative;
+    border-radius:var(--radius-lg);
+    overflow:hidden;
+    aspect-ratio:3/4;
+    cursor:pointer;
+    transition:transform 0.4s, box-shadow 0.4s;
+  }
+  .category-card:hover{
+    transform:translateY(-6px);
+    box-shadow:var(--shadow-lg);
+  }
+  .category-card img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:transform 0.6s;
+  }
+  .category-card:hover img{
+    transform:scale(1.05);
+  }
+  .category-card-overlay{
+    position:absolute; inset:0;
+    background:linear-gradient(
+      to top,
+      rgba(26,14,32,0.9) 0%,
+      rgba(26,14,32,0.3) 40%,
+      transparent 70%
+    );
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    padding:32px;
+  }
+  .category-card-overlay h3{
+    font-size:26px;
+    color:#fff;
+    margin-bottom:6px;
+  }
+  .category-card-overlay p{
+    font-size:14px;
+    color:rgba(255,255,255,0.7);
+    margin-bottom:16px;
+    line-height:1.5;
+  }
+  .category-card-overlay .card-cta{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:14px;
+    font-weight:600;
+    color:var(--gold-400);
+    transition:gap 0.3s;
+  }
+  .category-card:hover .card-cta{gap:10px;}
+
+  /* ================== HOW IT WORKS ================== */
+  .section-dark{
+    background:var(--plum-950);
+    color:#fff;
+  }
+  .section-dark .section-header h2{color:#fff;}
+  .section-dark .section-header p{color:rgba(255,255,255,0.6);}
+
+  .steps-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:40px;
+    max-width:1000px;
+    margin:0 auto;
+  }
+  .step-card{text-align:center;}
+  .step-icon{
+    width:64px; height:64px;
+    background:linear-gradient(135deg, var(--gold-500), var(--gold-400));
+    border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:28px;
+    margin:0 auto 20px;
+  }
+  .step-card h3{
+    font-size:20px;
+    color:#fff;
+    margin-bottom:10px;
+  }
+  .step-card p{
+    font-size:14px;
+    color:rgba(255,255,255,0.6);
+    line-height:1.7;
+  }
+
+  /* ================== BOOKING SECTION ================== */
+  #booking-section{
+    background:var(--cream-50);
+  }
 
   .tabs{
     display:flex;
-    gap:8px;
-    margin-bottom:28px;
-    background:var(--cream-100);
-    padding:6px;
-    border-radius:999px;
-    width:fit-content;
+    gap:4px;
+    background:var(--cream-200);
+    padding:4px;
+    border-radius:12px;
+    max-width:400px;
+    margin:0 auto 32px;
   }
   .tab-btn{
+    flex:1;
+    padding:10px 20px;
     border:none;
     background:transparent;
-    padding:10px 20px;
-    border-radius:999px;
     font-family:'Inter',sans-serif;
-    font-weight:600;
     font-size:14px;
+    font-weight:600;
     color:var(--ink-600);
     cursor:pointer;
-    transition:all .15s ease;
+    border-radius:9px;
+    transition:all 0.25s;
   }
   .tab-btn.active{
-    background:var(--plum-800);
-    color:var(--cream-50);
-  }
-
-  .panel{display:none;}
-  .panel.active{display:block; animation:fadeIn .25s ease;}
-  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
-
-  .card{
     background:#fff;
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:22px;
-    margin-bottom:16px;
-    box-shadow:var(--shadow);
+    color:var(--plum-950);
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
   }
+  .panel{display:none;}
+  .panel.active{display:block;}
 
-  .stylist-card{
+  /* Category filter pills */
+  .filter-pills{
     display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:16px;
+    gap:8px;
+    margin-bottom:24px;
     flex-wrap:wrap;
   }
-  .stylist-name{font-size:20px; margin-bottom:4px;}
-  .stylist-bio{color:var(--ink-600); font-size:14px; max-width:52ch;}
-  .btn{
+  .category-btn{
+    padding:8px 20px;
+    border:1.5px solid var(--line);
+    background:transparent;
     font-family:'Inter',sans-serif;
-    font-weight:600;
-    font-size:14px;
-    border:none;
-    border-radius:10px;
-    padding:11px 20px;
-    cursor:pointer;
-    transition:transform .12s ease, box-shadow .12s ease;
-  }
-  .btn:active{transform:scale(0.97);}
-  .btn-primary{background:var(--plum-800); color:#fff;}
-  .btn-primary:hover{background:var(--plum-600);}
-  .btn-gold{background:var(--gold-500); color:var(--plum-950);}
-  .btn-gold:hover{background:var(--gold-400);}
-  .btn-outline{background:transparent; color:var(--plum-800); border:1.5px solid var(--plum-800);}
-  .btn-outline:hover{background:var(--cream-100);}
-  .btn-danger{background:transparent; color:var(--err); border:1.5px solid var(--err);}
-  .btn-danger:hover{background:#FBEEEd;}
-  .btn:disabled{opacity:0.5; cursor:not-allowed;}
-
-  label{
-    display:block;
     font-size:13px;
     font-weight:600;
     color:var(--ink-600);
-    margin-bottom:6px;
-    margin-top:16px;
+    cursor:pointer;
+    border-radius:50px;
+    transition:all 0.2s;
   }
-  label:first-of-type{margin-top:0;}
-  input, select, textarea{
-    width:100%;
-    padding:11px 13px;
-    border:1.5px solid var(--line);
-    border-radius:10px;
-    font-family:'Inter',sans-serif;
-    font-size:15px;
+  .category-btn.active{
+    background:var(--plum-950);
+    color:#fff;
+    border-color:var(--plum-950);
+  }
+  .category-btn:hover:not(.active){
+    border-color:var(--plum-800);
+    color:var(--plum-800);
+  }
+
+  /* Cards */
+  .card{
     background:#fff;
-    color:var(--ink-900);
+    border-radius:var(--radius);
+    padding:24px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.06);
+    transition:box-shadow 0.3s;
   }
-  input:focus, select:focus, textarea:focus{
-    outline:none;
-    border-color:var(--plum-600);
-    box-shadow:0 0 0 3px rgba(92,45,92,0.12);
-  }
-  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-  @media(max-width:560px){.field-row{grid-template-columns:1fr;}}
+  .card:hover{box-shadow:var(--shadow);}
 
-  .modal-backdrop{
-    position:fixed; inset:0;
-    background:rgba(36,26,38,0.55);
-    display:none;
-    align-items:center; justify-content:center;
-    padding:20px;
-    z-index:50;
+  .stylist-card{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+    gap:16px;
   }
-  .modal-backdrop.open{display:flex;}
-  .modal{
-    background:#fff;
-    border-radius:18px;
-    padding:28px;
-    max-width:480px;
-    width:100%;
-    max-height:90vh;
-    overflow-y:auto;
-    box-shadow:0 30px 60px -20px rgba(0,0,0,0.35);
+  .stylist-name{
+    font-family:'Fraunces',serif;
+    font-size:18px;
+    font-weight:600;
+    color:var(--plum-950);
   }
-  .modal-head{
-    display:flex; justify-content:space-between; align-items:flex-start;
-    margin-bottom:4px;
-  }
-  .modal-close{
-    background:none; border:none; font-size:22px; cursor:pointer; color:var(--ink-600);
-    line-height:1; padding:4px;
-  }
-  .modal-sub{color:var(--ink-600); font-size:14px; margin-top:4px;}
-
-  .alert{
-    border-radius:10px;
-    padding:12px 14px;
-    font-size:14px;
-    margin-top:16px;
-    display:none;
-  }
-  .alert.show{display:block;}
-  .alert-error{background:#FBEEEd; color:var(--err); border:1px solid #F0C9C5;}
-  .alert-success{background:#EAF4EC; color:var(--ok); border:1px solid #C9E3CE;}
-
-  .alt-slot{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:10px 12px;
-    border:1px solid var(--line);
-    border-radius:10px;
-    margin-top:8px;
-    font-size:14px;
-  }
-  .alt-slot small{color:var(--ink-600); display:block;}
-
-  .lookup-box{
-    display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
-  }
-  .lookup-box > div{flex:1; min-width:180px;}
-
-  .appt-card{
-    display:flex; justify-content:space-between; align-items:flex-start;
-    gap:16px; flex-wrap:wrap;
+  .stylist-bio{
+    font-size:13px;
+    color:var(--ink-600);
+    margin-top:4px;
+    line-height:1.5;
   }
   .appt-status{
     display:inline-block;
     font-size:11px;
     font-weight:700;
-    letter-spacing:0.05em;
     text-transform:uppercase;
-    padding:4px 10px;
-    border-radius:999px;
-    margin-bottom:8px;
+    letter-spacing:0.8px;
+    padding:4px 12px;
+    border-radius:50px;
   }
-  .status-confirmed{background:#EAF4EC; color:var(--ok);}
-  .status-ready{background:#FFF3D9; color:#8A6300;}
-  .status-cancelled{background:#F1E9EC; color:var(--ink-600);}
-  .appt-actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .status-confirmed{background:#E7F5EC; color:#2D6A3F;}
+  .status-ready{background:#FFF3E0; color:#B8660A;}
+  .status-cancelled{background:#FDE8E7; color:#B4453C;}
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    cursor:pointer;
+    border:none;
+    border-radius:10px;
+    transition:all 0.25s;
+    font-size:14px;
+  }
+  .btn-primary{
+    background:var(--plum-950);
+    color:#fff;
+    padding:12px 28px;
+  }
+  .btn-primary:hover{
+    background:var(--plum-800);
+    transform:translateY(-1px);
+    box-shadow:0 4px 14px rgba(42,23,48,0.3);
+  }
+  .btn-gold{
+    background:var(--gold-500);
+    color:var(--plum-950);
+    padding:13px 28px;
+    font-weight:700;
+  }
+  .btn-gold:hover{
+    background:var(--gold-400);
+    transform:translateY(-1px);
+  }
+  .btn-outline{
+    background:transparent;
+    border:1.5px solid var(--line);
+    color:var(--ink-900);
+    padding:10px 20px;
+  }
+  .btn-outline:hover{border-color:var(--plum-800); color:var(--plum-800);}
+  .btn-danger{
+    background:transparent;
+    border:1.5px solid var(--err);
+    color:var(--err);
+    padding:10px 20px;
+  }
+  .btn-danger:hover{background:var(--err); color:#fff;}
+
+  /* Lookup */
+  .lookup-box{
+    display:grid;
+    grid-template-columns:1fr 1fr auto;
+    gap:12px;
+    align-items:end;
+  }
+  .lookup-box label{
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-600);
+    display:block;
+    margin-bottom:6px;
+  }
+  .lookup-box input{
+    width:100%;
+    padding:10px 14px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    font-size:14px;
+    font-family:inherit;
+    transition:border-color 0.2s;
+    outline:none;
+  }
+  .lookup-box input:focus{border-color:var(--plum-600);}
+
+  /* Alerts */
+  .alert{
+    padding:12px 16px;
+    border-radius:10px;
+    font-size:13px;
+    margin-top:14px;
+    display:none;
+    line-height:1.5;
+  }
+  .alert.show{display:block;}
+  .alert-error{background:#FDE8E7; color:var(--err);}
+  .alert-success{background:#E7F5EC; color:var(--ok);}
+
+  /* Modals */
+  .modal-backdrop{
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(26,14,32,0.6);
+    backdrop-filter:blur(6px);
+    z-index:200;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:#fff;
+    border-radius:var(--radius-lg);
+    width:100%;
+    max-width:480px;
+    padding:32px;
+    box-shadow:var(--shadow-lg);
+    max-height:90vh;
+    overflow-y:auto;
+    animation:modalIn 0.3s ease;
+  }
+  @keyframes modalIn{
+    from{opacity:0; transform:translateY(20px) scale(0.97);}
+    to{opacity:1; transform:translateY(0) scale(1);}
+  }
+  .modal-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:24px;
+  }
+  .modal-close{
+    background:var(--cream-100);
+    border:none;
+    width:36px; height:36px;
+    border-radius:50%;
+    font-size:20px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-600);
+    transition:all 0.2s;
+  }
+  .modal-close:hover{background:var(--cream-200); color:var(--ink-900);}
+  .modal-sub{font-size:13px; color:var(--ink-600); margin-top:4px;}
+
+  .modal label{
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-600);
+    display:block;
+    margin:16px 0 6px;
+  }
+  .modal input, .modal select, .modal textarea{
+    width:100%;
+    padding:11px 14px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    font-size:14px;
+    font-family:inherit;
+    outline:none;
+    transition:border-color 0.2s;
+  }
+  .modal input:focus, .modal select:focus, .modal textarea:focus{
+    border-color:var(--plum-600);
+  }
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+
+  /* Appointment cards */
+  .appt-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+    gap:16px;
+  }
+  .appt-actions{display:flex; gap:8px; flex-shrink:0;}
+  .alt-slot{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    margin-top:8px;
+    font-size:13px;
+  }
 
   .empty-state{
     text-align:center;
@@ -273,72 +623,237 @@
   }
   .empty-state h3{color:var(--plum-800); margin-bottom:6px;}
 
-  .config-note{
-    font-size:12px;
-    color:var(--ink-600);
-    text-align:center;
-    margin-top:40px;
+  /* ================== FOOTER ================== */
+  .footer{
+    background:var(--plum-950);
+    color:rgba(255,255,255,0.6);
+    padding:60px 40px 30px;
   }
-  .config-note code{background:var(--cream-100); padding:2px 6px; border-radius:4px;}
+  .footer-grid{
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr 1fr;
+    gap:40px;
+    max-width:1100px;
+    margin:0 auto;
+  }
+  .footer-brand{
+    font-family:'Fraunces',serif;
+    font-size:22px;
+    font-weight:700;
+    color:#fff;
+    margin-bottom:12px;
+  }
+  .footer-brand span{color:var(--gold-400);}
+  .footer-desc{font-size:14px; line-height:1.7; max-width:300px;}
+  .footer-col h4{
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:rgba(255,255,255,0.85);
+    margin-bottom:16px;
+  }
+  .footer-col a{
+    display:block;
+    font-size:14px;
+    color:rgba(255,255,255,0.55);
+    margin-bottom:10px;
+    transition:color 0.2s;
+  }
+  .footer-col a:hover{color:var(--gold-400);}
+  .footer-bottom{
+    border-top:1px solid rgba(255,255,255,0.08);
+    margin-top:40px;
+    padding-top:24px;
+    text-align:center;
+    font-size:13px;
+    max-width:1100px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  /* ================== RESPONSIVE ================== */
+  @media(max-width:900px){
+    .nav{padding:14px 20px;}
+    .nav-links a:not(.btn-nav){display:none;}
+    .hero-content{padding:120px 24px 80px;}
+    .hero-stats{gap:28px; flex-wrap:wrap;}
+    .categories-grid{grid-template-columns:1fr;}
+    .category-card{aspect-ratio:4/3;}
+    .steps-grid{grid-template-columns:1fr; gap:32px;}
+    .section{padding:60px 20px;}
+    .footer-grid{grid-template-columns:1fr 1fr;}
+    .lookup-box{grid-template-columns:1fr;}
+    .field-row{grid-template-columns:1fr;}
+  }
+  @media(max-width:600px){
+    .hero h1{font-size:32px;}
+    .hero-actions{flex-direction:column;}
+    .btn-hero-primary, .btn-hero-outline{width:100%; justify-content:center;}
+    .categories-grid{gap:16px;}
+    .footer-grid{grid-template-columns:1fr;}
+  }
 </style>
 </head>
 <body>
 
-<header class="hero">
-  <div class="hero-inner">
-    <span class="eyebrow">Book with confidence</span>
-    <h1>Find your stylist. Pick your time. Show up.</h1>
-    <p>Browse real availability, book in under a minute, and get notified the moment your stylist is ready for you — no account needed.</p>
+<!-- ===================== NAVIGATION ===================== -->
+<nav class="nav" id="mainNav">
+  <a href="/" class="nav-brand">Hair<span>booking</span></a>
+  <div class="nav-links">
+    <a href="#services">Services</a>
+    <a href="#how-it-works">How it works</a>
+    <a href="#booking-section">Book Now</a>
+    <a href="#booking-section" class="btn-nav">Get Started</a>
   </div>
-</header>
-<div class="braid-divider"></div>
+</nav>
 
-<main>
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="browse">Browse Stylists</button>
-    <button class="tab-btn" data-tab="manage">My Appointments</button>
-  </div>
-
-  <!-- ===================== BROWSE / BOOK ===================== -->
-  <section id="panel-browse" class="panel active">
-    <div class="tabs" id="categoryTabs" style="background:transparent; padding:0; margin-bottom:20px;">
-      <button class="tab-btn category-btn active" data-category="">All</button>
-      <button class="tab-btn category-btn" data-category="hairstylist">Hairstylists</button>
-      <button class="tab-btn category-btn" data-category="barber">Barbers</button>
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <span class="hero-eyebrow">✂️ Beauty & Grooming Platform</span>
+    <h1>Book your <em>barber</em>, <em>stylist</em>, or <em>nail tech</em> — in&nbsp;seconds</h1>
+    <p class="hero-sub">Browse real availability from top professionals near you. Book in under a minute. Get notified the moment they're ready for you.</p>
+    <div class="hero-actions">
+      <a href="#booking-section" class="btn-hero-primary">Book Now →</a>
+      <a href="#services" class="btn-hero-outline">Explore Services</a>
     </div>
-    <div id="stylistList"></div>
-  </section>
-
-  <!-- ===================== MANAGE (lookup, cancel, reschedule) ===================== -->
-  <section id="panel-manage" class="panel">
-    <div class="card">
-      <h3 style="margin-bottom:14px;">Find your appointments</h3>
-      <p style="color:var(--ink-600); font-size:14px; margin-bottom:16px;">
-        Enter the email and phone number you used when booking — we match both together to keep your appointments private.
-      </p>
-      <div class="lookup-box">
-        <div>
-          <label>Email</label>
-          <input type="email" id="lookupEmail" placeholder="you@example.com">
-        </div>
-        <div>
-          <label>Phone</label>
-          <input type="text" id="lookupPhone" placeholder="0800 000 0000">
-        </div>
-        <button class="btn btn-primary" id="lookupBtn" style="height:44px;">Find</button>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-number">500+</div>
+        <div class="stat-label">Appointments Booked</div>
       </div>
-      <div class="alert alert-error" id="lookupError"></div>
+      <div class="stat-item">
+        <div class="stat-number">50+</div>
+        <div class="stat-label">Top Professionals</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">4.9★</div>
+        <div class="stat-label">Client Rating</div>
+      </div>
     </div>
-    <div id="apptResults"></div>
-  </section>
-</main>
+  </div>
+</section>
+
+<!-- ===================== SERVICES / CATEGORIES ===================== -->
+<section class="section" id="services">
+  <div class="section-header">
+    <div class="section-eyebrow">Our Services</div>
+    <h2>Find the right professional for you</h2>
+    <p>Whether you need a fresh cut, a new style, or a perfect set of nails — we've got the best professionals ready to serve you.</p>
+  </div>
+  <div class="categories-grid">
+    <div class="category-card" onclick="scrollToBooking('hairstylist')">
+      <img src="{% static 'booking/images/hairstylist.jpg' %}" alt="Hairstylist braiding a client's hair" loading="lazy">
+      <div class="category-card-overlay">
+        <h3>Hairstylists</h3>
+        <p>Expert braiding, styling, colouring, and treatments for every hair type and texture.</p>
+        <span class="card-cta">Book a hairstylist →</span>
+      </div>
+    </div>
+    <div class="category-card" onclick="scrollToBooking('barber')">
+      <img src="{% static 'booking/images/barber.jpg' %}" alt="Barber giving a client a sharp fade haircut" loading="lazy">
+      <div class="category-card-overlay">
+        <h3>Barbers</h3>
+        <p>Precision fades, lineups, beard trims, and classic cuts by skilled barbers.</p>
+        <span class="card-cta">Book a barber →</span>
+      </div>
+    </div>
+    <div class="category-card" onclick="scrollToBooking('nail_tech')">
+      <img src="{% static 'booking/images/nailtech.jpg' %}" alt="Nail technician doing an intricate manicure" loading="lazy">
+      <div class="category-card-overlay">
+        <h3>Nail Technicians</h3>
+        <p>Gel nails, acrylics, manicures, pedicures, and nail art by talented techs.</p>
+        <span class="card-cta">Book a nail tech →</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOW IT WORKS ===================== -->
+<section class="section section-dark" id="how-it-works">
+  <div class="section-header">
+    <div class="section-eyebrow" style="color:var(--gold-400);">How It Works</div>
+    <h2>Booked in under a minute</h2>
+    <p>No accounts, no phone calls, no waiting. Just pick, book, and show up.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-icon">🔍</div>
+      <h3>1. Browse Professionals</h3>
+      <p>Explore our roster of vetted hairstylists, barbers, and nail techs. Filter by category to find exactly who you need.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-icon">📅</div>
+      <h3>2. Pick Your Time</h3>
+      <p>See real-time availability. Pick a date and time that works for you — no back-and-forth, no guessing.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-icon">✨</div>
+      <h3>3. Show Up & Shine</h3>
+      <p>You'll be notified when your professional is ready. Walk in, sit down, and leave looking your best.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BOOKING SECTION ===================== -->
+<section class="section" id="booking-section">
+  <div class="section-header">
+    <div class="section-eyebrow">Ready?</div>
+    <h2>Book your appointment</h2>
+    <p>Browse available professionals and book in just a few taps.</p>
+  </div>
+
+  <div style="max-width:700px; margin:0 auto;">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="browse">Browse Pros</button>
+      <button class="tab-btn" data-tab="manage">My Appointments</button>
+    </div>
+
+    <!-- BROWSE / BOOK -->
+    <section id="panel-browse" class="panel active">
+      <div class="filter-pills" id="categoryTabs">
+        <button class="category-btn active" data-category="">All</button>
+        <button class="category-btn" data-category="hairstylist">Hairstylists</button>
+        <button class="category-btn" data-category="barber">Barbers</button>
+        <button class="category-btn" data-category="nail_tech">Nail Techs</button>
+      </div>
+      <div id="stylistList"></div>
+    </section>
+
+    <!-- MANAGE -->
+    <section id="panel-manage" class="panel">
+      <div class="card">
+        <h3 style="margin-bottom:14px; font-family:'Fraunces',serif; font-size:20px;">Find your appointments</h3>
+        <p style="color:var(--ink-600); font-size:14px; margin-bottom:16px;">
+          Enter the email and phone number you used when booking — we match both together to keep your appointments private.
+        </p>
+        <div class="lookup-box">
+          <div>
+            <label>Email</label>
+            <input type="email" id="lookupEmail" placeholder="you@example.com">
+          </div>
+          <div>
+            <label>Phone</label>
+            <input type="text" id="lookupPhone" placeholder="0800 000 0000">
+          </div>
+          <button class="btn btn-primary" id="lookupBtn" style="height:44px;">Find</button>
+        </div>
+        <div class="alert alert-error" id="lookupError"></div>
+      </div>
+      <div id="apptResults"></div>
+    </section>
+  </div>
+</section>
 
 <!-- ===================== BOOKING MODAL ===================== -->
 <div class="modal-backdrop" id="bookModal">
   <div class="modal">
     <div class="modal-head">
       <div>
-        <h3 id="bookModalTitle">Book Appointment</h3>
+        <h3 id="bookModalTitle" style="font-family:'Fraunces',serif;">Book Appointment</h3>
         <div class="modal-sub" id="bookModalSub"></div>
       </div>
       <button class="modal-close" onclick="closeModal('bookModal')">&times;</button>
@@ -379,7 +894,7 @@
 <div class="modal-backdrop" id="rescheduleModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>Reschedule</h3>
+      <h3 style="font-family:'Fraunces',serif;">Reschedule</h3>
       <button class="modal-close" onclick="closeModal('rescheduleModal')">&times;</button>
     </div>
     <label>New date</label>
@@ -393,14 +908,38 @@
   </div>
 </div>
 
-<p class="config-note">Hairbooking — a scheduling platform for hairstylists and barbers.</p>
+<!-- ===================== FOOTER ===================== -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">Hair<span>booking</span></div>
+      <p class="footer-desc">The easiest way to find and book top barbers, hairstylists, and nail technicians. Built for everyone.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <a href="#" onclick="scrollToBooking('hairstylist'); return false;">Hairstylists</a>
+      <a href="#" onclick="scrollToBooking('barber'); return false;">Barbers</a>
+      <a href="#" onclick="scrollToBooking('nail_tech'); return false;">Nail Techs</a>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <a href="#how-it-works">How it works</a>
+      <a href="#booking-section">Book now</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="mailto:hello@hairbooking.com">hello@hairbooking.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    &copy; 2026 Hairbooking. All rights reserved.
+  </div>
+</footer>
 
 {% csrf_token %}
 <script>
 /* =========================================================
-   CONFIG — relative path works because Django now serves this
-   page from the same origin as the API. If you ever split the
-   frontend out to its own host again, set an absolute URL here.
+   CONFIG
    ========================================================= */
 const API_BASE = "/api";
 
@@ -408,15 +947,39 @@ const API_BASE = "/api";
 function getCSRFToken() {
   const el = document.querySelector('[name=csrfmiddlewaretoken]');
   if (el) return el.value;
-  // fallback: read from cookie
   const m = document.cookie.match(/csrftoken=([^;]+)/);
   return m ? m[1] : '';
 }
 
-let currentBookingStylist = null;   // {id, name, defaultDuration}
-let currentReschedule = null;       // {appointmentId, hairstylistId, duration}
+let currentBookingStylist = null;
+let currentReschedule = null;
 
-/* ---------------- Tabs ---------------- */
+/* ---------- Sticky Nav ---------- */
+const nav = document.getElementById('mainNav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+/* ---------- Scroll to booking with category filter ---------- */
+function scrollToBooking(category) {
+  // Switch to browse tab
+  document.querySelectorAll(".tabs > .tab-btn:not(.category-btn)").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelector('[data-tab="browse"]').classList.add("active");
+  document.getElementById("panel-browse").classList.add("active");
+
+  // Set category filter
+  document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
+  const target = document.querySelector(`.category-btn[data-category="${category}"]`);
+  if (target) target.classList.add("active");
+  currentCategory = category || "";
+  loadStylists();
+
+  // Smooth scroll
+  document.getElementById("booking-section").scrollIntoView({ behavior: "smooth" });
+}
+
+/* ---------- Tabs ---------- */
 document.querySelectorAll(".tabs > .tab-btn:not(.category-btn)").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".tabs > .tab-btn:not(.category-btn)").forEach(b => b.classList.remove("active"));
@@ -426,7 +989,7 @@ document.querySelectorAll(".tabs > .tab-btn:not(.category-btn)").forEach(btn => 
   });
 });
 
-/* ---------------- Category filter (Hairstylists / Barbers / All) ---------------- */
+/* ---------- Category filter ---------- */
 let currentCategory = "";
 document.querySelectorAll(".category-btn").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -444,7 +1007,7 @@ function openModal(id){
   document.getElementById(id).classList.add("open");
 }
 
-/* ---------------- Load stylists ---------------- */
+/* ---------- Load stylists ---------- */
 async function loadStylists(){
   const container = document.getElementById("stylistList");
   container.innerHTML = `<div class="empty-state">Loading…</div>`;
@@ -456,14 +1019,15 @@ async function loadStylists(){
     const data = await res.json();
     const stylists = data.results || data;
     if(!stylists.length){
-      container.innerHTML = `<div class="empty-state"><h3>Nobody here yet</h3><p>Add one via the Django admin panel.</p></div>`;
+      container.innerHTML = `<div class="empty-state"><h3>Nobody here yet</h3><p>Check back soon — new professionals are joining daily.</p></div>`;
       return;
     }
     container.innerHTML = "";
     stylists.forEach(s => {
       const el = document.createElement("div");
       el.className = "card stylist-card";
-      const categoryLabel = s.category === "barber" ? "Barber" : "Hairstylist";
+      const categoryLabels = { hairstylist: "Hairstylist", barber: "Barber", nail_tech: "Nail Tech" };
+      const categoryLabel = categoryLabels[s.category] || "Professional";
       el.innerHTML = `
         <div>
           <span class="appt-status status-confirmed" style="margin-bottom:6px;">${categoryLabel}</span>
@@ -476,7 +1040,7 @@ async function loadStylists(){
       container.appendChild(el);
     });
   }catch(err){
-    container.innerHTML = `<div class="empty-state"><h3>Couldn't reach the server</h3><p>Check that Django is running and this page is served from the same origin as the API.</p></div>`;
+    container.innerHTML = `<div class="empty-state"><h3>Couldn't reach the server</h3><p>Please try again in a moment.</p></div>`;
   }
 }
 
@@ -486,7 +1050,7 @@ function escapeHtml(str){
   return d.innerHTML;
 }
 
-/* ---------------- Booking flow ---------------- */
+/* ---------- Booking flow ---------- */
 function startBooking(id, name){
   currentBookingStylist = { id, name };
   document.getElementById("bookModalTitle").textContent = "Book with " + name;
@@ -586,7 +1150,6 @@ document.getElementById("bookSubmitBtn").addEventListener("click", async () => {
     } else if(data.reason === "conflict"){
       showAlert("bookError", data.message);
       renderAlternatives(data.alternatives, "bookAlternatives", (alt) => {
-        // Jump the modal to the alternative's stylist/time.
         currentBookingStylist = { id: alt.hairstylist_id, name: alt.hairstylist_name };
         document.getElementById("bookModalTitle").textContent = "Book with " + alt.hairstylist_name;
         const d = new Date(alt.start_time);
@@ -628,7 +1191,7 @@ function renderAlternatives(alternatives, containerId, onPick){
   });
 }
 
-/* ---------------- My Appointments (lookup) ---------------- */
+/* ---------- My Appointments (lookup) ---------- */
 document.getElementById("lookupBtn").addEventListener("click", lookupAppointments);
 
 async function lookupAppointments(){
@@ -676,7 +1239,7 @@ function renderAppointmentCard(appt){
   el.innerHTML = `
     <div>
       <span class="appt-status ${statusClass}">${escapeHtml(appt.status)}</span>
-      <div style="font-size:17px; font-weight:600; color:var(--plum-950);">${escapeHtml(appt.hairstylist_name)}</div>
+      <div style="font-size:17px; font-weight:600; color:var(--plum-950); font-family:'Fraunces',serif;">${escapeHtml(appt.hairstylist_name)}</div>
       <div style="color:var(--ink-600); font-size:14px; margin-top:2px;">${dateLabel}</div>
     </div>
     <div class="appt-actions">
@@ -777,7 +1340,7 @@ document.getElementById("reschedSubmitBtn").addEventListener("click", async () =
   }
 });
 
-/* ---------------- Init ---------------- */
+/* ---------- Init ---------- */
 loadStylists();
 </script>
 </body>
